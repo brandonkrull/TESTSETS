@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# bash script for geometry optimizations with rirpa in TURBOMOLE
+#
+#
+# Input section
+#
+title=$1
+basis=$2
+define << EOF >define.out
+
+
+
+a coord
+*
+no
+b all $basis
+*
+eht
+
+
+
+
+
+dft
+on
+func pbe
+grid 6
+*
+mp2
+freeze
+end
+cbas
+
+
+
+b all def2-QZVPP
+*
+memory 8000
+denconv 1d-9
+*
+ri
+on
+m
+1000
+jbas
+b all def2-QZVPP
+*
+scf
+conv
+8
+iter
+100
+
+*
+EOF
+FILE=control
+sed '1 i\$rirpa\n   npoints 50\n   rpagrad' -i $FILE

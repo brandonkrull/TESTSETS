@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# bash script for geometry optimizations with rirpa in TURBOMOLE
+#
+#
+# Input section
+#
+title=$1
+basis=$2
+define << EOF >define.out
+
+
+
+a coord
+desy 1d-2
+*
+no
+b all $basis
+*
+eht
+
+
+
+
+
+dft
+on
+func pbe
+grid 6
+*
+mp2
+denconv 1d-9
+*
+ri
+on
+m
+1000
+*
+scf
+conv
+9
+iter
+150
+
+*
+EOF
+

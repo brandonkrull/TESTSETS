@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# bash script for geometry optimizations with rirpa in TURBOMOLE
+#
+#
+# Input section
+#
+title=$1
+basis=$2
+echo "TPSS will be used to generate the semi-local reference"
+define << EOF >define.out
+
+
+
+a coord
+*
+no
+b all $basis
+*
+eht
+
+
+
+
+
+dft
+on
+func tpss
+grid m5
+*
+mp2
+memory 15000
+denconv 1d-7
+*
+ri
+on
+m
+2000
+*
+scf
+conv
+7
+iter
+100
+
+*
+EOF
+FILE=control
+sed -i '1 i \$rpa correlation energy\n\$sosex\n\$gl2sing' $FILE

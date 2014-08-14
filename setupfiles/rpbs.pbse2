@@ -1,0 +1,237 @@
+#!/bin/sh
+#
+# Template script for PBS jobs in the Modeling Facility partition of GreenPlanet.
+#
+# Note that "#PBS" is not a comment, but "# PBS" is (note the space after "#")
+
+# Job name:
+#----------------
+#PBS -N q40
+#----------------
+
+# Queue name:
+#----------------
+#PBS -q mf_medium
+#----------------
+
+######################
+# The possible job submission queues are listed here.
+# Name:		Priority:	Time limit:
+# mf_short	1000		3h
+# mf_medium	400		14h
+# mf_long	100		60h
+# mf_verylong	10		336h 
+# mf_infinity	1		none 
+# mf_prefinity	1		none* 
+#
+# *mf_prefinity jobs can temporarily be put to sleep by high-priority jobs, but can run in slots reserved
+# for short and medium jobs.
+#
+######################
+
+# Specifying resources needed for run:
+# Example: #PBS -l nodes=4:ppn=8:qdr-core:neh2.8,mem=2000mb,file=40gb
+# syntax: number_of_nodes:processors_per_node:node_feature_1:node_feature_2[:feature3...],memory,disk,etc.
+#--------------
+#PBS -l nodes=1:ppn=8,mem=10gb,file=20gb
+#--------------
+
+# NOTE!! memory is per total job, but file is per process
+
+###################
+# USE of NODE FEATURES:
+#  Nodes are tagged with several additional labels to allow better selection of features. They are grouped in several
+# categories. Each node has only one feature tag from each category.
+#
+# 1) Node chassis type: pe2950, r410, r610, r815, c6100
+# 2) Total RAM:         ram12g, ram16g, ram24g, ram64g, ram128g
+# 3) IB Network switch: qdr-core, qdr-edge1 (all are on the core switch except those in racks 10 and 11)
+# 4) Processor:         har2.66, neh2.8, wes2.8, m-c1.9, m-c2.2
+# 5) Hyperthreading:    ht-on, ht-off
+#
+# For example, The 7 original PowerEdge2950 nodes have 16GiB RAM, 2.66GHz Harpertown Xeon processors, and are attached to
+# The second QDR IB edge switch. The following resource requests would select only these nodes:
+#
+# PBS -l nodes=2:ppn=8:pe2950
+# PBS -l nodes=1:ppn=4:har2.66
+# PBS -l nodes=5:ppn=6:ram16g
+#
+# But since there are some R815 nodes on QDR edge 1, this line may not:
+#
+# PBS -l nodes=3:ppn=8:qdr-edge1
+#
+# If you want to restrict your run to the 12GiB RAM R610 nodes (but only need 1GiB per process), you will need to combine features:
+#
+# PBS -l nodes=4:ppn=4:r610:ram12g,mem=16gb
+#
+# Note that the node features are separated by ":", but the job resource requests are separated by ",". 
+##################
+
+##################
+# To request specific nodes use => nodes=<node>[+<node>]:property
+#    <node> can be specified manually (e.g. compute-4-1)
+#    <node> can also be another "node property". Look at the
+#           "pbsnodes -a" output!
+# To request more than one VP (pbs: virtual processor) use =>
+#    nodes=<node>:ppn=np
+#
+# Example: nodes=compute-4-6:ppn=2+compute-5-7+compute-5-9:ppn=6
+# (you ask for two processors on compute-4-6, one on compute-5-7, and six on compute-5-9)
+#
+#          nodes=1,mem=5000mb
+# (you ask for one node and 5000mb of memory)
+#
+#          nodes=1,walltime=43:00:00
+# (you ask for one node and 43h of walltime; if you need less than the 60h of the long queue)
+#
+#          nodes=4:ppn=2
+# (you ask for two processors each on four nodes (8 total cores))
+###################
+
+###################
+# Export environment:
+#PBS -V
+#
+# Rerunable flag:
+# (Change to y to make job rerunable)
+#PBS -r n
+###################
+
+#########################################
+# Set copy_local to "yes" to copy contents of submission directory to node-local workspace.
+# After the calculation, results will be copied back and the temporary work directory
+# /work/$USER/$PBS_JOBID.greenplanet will be deleted.
+#
+# If time runs out before the job is done, the copyback will be done by a post-execution
+# script, but only if the PBS_WORK_DIR file (created in this script) exists in the
+# submission directory. 
+
+copy_local="yes"
+
+#########################################
+
+
+pbs_startjob(){
+#----------------- Actual calculation command goes here: ---------------------------
+
+#Temporary fix for bad default number of threads
+unset OMP_NUM_THREADS
+
+# ridft > ridft.out
+actual -r
+if [[ -d tmp ]] ; then
+   rm -r tmp
+fi
+cpc tmp
+cd tmp
+kdg rij
+sed -i '1 i \$gl2sing\n\$smp_cpus 8' control
+~/bin/dscf.smp > dscf.sing
+cp fort.710 ../.
+cp dscf.sing ../.
+cd ../
+rm -r tmp
+
+echo Job Done
+#-----------------------------------------------------------------------------------
+}
+
+#########################################################################
+#########    Never change anything in this section              #########
+#########    unless you know what you are doing of course !!!!  #########
+#########################################################################
+
+# PBS environment variables:
+#  PBS_O_LOGNAME    is the user who started the job
+#  PBS_O_HOST       is the host on which the job is started
+#  PBS_O_WORKDIR    is the directory in which the job is started
+#  PBS_NODEFILE     is the file with the names of the nodes to run on
+#  PBS_JOBID        is the jobid of the pbs job
+#  PBS_JOBNAME      is the jobname of the pbs job
+#  PBS_QUEUE        is the queue-name in which the job runs
+# some important local environment variables:
+#  PBS_L_RUNDIR     is the directory in which the job is running
+#  PBS_L_NODENAME   is the (first) host on which the job runs
+#  PBS_L_NODENUMBER is the number of nodes on which the job runs
+#  PBS_L_GLOBALWORK is the global work directory of the cluster
+#  PBS_L_LOCALWORK  is the local work directory of the cluster
+
+PBS_L_NODENUMBER=`wc -l < $PBS_NODEFILE`
+
+# Function to echo informational output
+pbs_infoutput(){
+# Informational output
+echo "=================================== PBS JOB ==================================="
+date
+echo
+echo "The job will be started on the following node(s):"
+cat "${PBS_NODEFILE}"
+echo
+echo "PBS User:           $PBS_O_LOGNAME"
+echo "Job directory:      $PBS_L_RUNDIR"
+echo "Job-id:             $PBS_JOBID"
+echo "Jobname:            $PBS_JOBNAME"
+echo "Queue:              $PBS_QUEUE"
+echo "Number of nodes:    $PBS_L_NODENUMBER"
+echo "PBS startdirectory: $PBS_O_HOST:$PBS_O_WORKDIR"
+echo "=================================== PBS JOB ==================================="
+echo
+echo "--- PBS job-script output ---"
+}
+
+pbs_infoutput
+
+export HOSTS_FILE=$PBS_NODEFILE
+nprocs=`cat $HOSTS_FILE | wc -l`
+nnodes=`uniq $HOSTS_FILE | wc -l`
+
+# Turbomole parallel setup:
+if (( $nprocs > 1 )); then
+  export PARA_ARCH=MPI
+  source $TURBODIR/Config_turbo_env
+  export PARNODES=$nprocs
+else
+  unset PARNODES
+fi
+
+# Copy data to a local work directory:
+if [ "${copy_local}" = "yes" ]; then
+  echo `hostname` > ${PBS_O_WORKDIR}/PBS_WORK_NODE
+  if (( $nnodes > 1 )); then
+    work_dir="/work/cluster/${USER}/${PBS_JOBID}"
+  else
+    work_dir="/work/${USER}/${PBS_JOBID}"
+  fi
+  
+  mkdir -p ${work_dir}
+  rsync -a ${PBS_O_WORKDIR}/ ${work_dir}/
+  if (( $? != 0)); then
+    echo "FAIL: rsync to local execution directory had problems. Aborting job."
+    exit 1
+  else
+    echo "${work_dir}" > ${PBS_O_WORKDIR}/PBS_WORK_DIR   
+  fi
+  cd ${work_dir}
+fi
+
+pbs_startjob
+
+# Copy data back to the submission directory:
+if [ "${copy_local}" = "yes" ]; then
+  rsync -a ${work_dir}/ ${PBS_O_WORKDIR}/
+  if (( $? == 0)); then
+    cd ${PBS_O_WORKDIR}
+    rm -rf ${work_dir}
+    # Since the copyback worked, delete the file that triggers the post-execution script
+    rm ${PBS_O_WORKDIR}/PBS_WORK_DIR
+    rm ${PBS_O_WORKDIR}/PBS_WORK_NODE
+  else
+    echo "FAIL: rsync back to submission directory had problems. Execution directory not removed."
+    cd ${PBS_O_WORKDIR}
+    exit 1
+  fi
+fi
+
+#
+# End file.
+#

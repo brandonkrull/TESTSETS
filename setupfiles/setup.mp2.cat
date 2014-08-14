@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# bash script for single-point rimp2 energy on molekel
+#
+#
+# Input section
+#
+title=$1
+basis=$2
+echo "TPSS will be used to generate the semi-local reference"
+define << EOF >define.out
+
+
+
+a coord
+*
+no
+b all $basis
+*
+eht
+y
++1
+
+
+
+
+mp2
+freeze
+end
+denconv	1d-8 
+memory 6000
+*
+scf
+conv
+8
+iter
+300
+
+*
+EOF

@@ -1,0 +1,148 @@
+#!/bin/bash
+#
+# bash script for running GMTKN24 benchmark sets
+# HENK ESHUIS ORIGINAL : Circa 2010
+# ORIGINAL TITLE : runset
+# MODIFIED : Jeb Bates, Dec 2012
+##########################
+## Input 
+##########################
+# METHOD should correspond to the setup scripts inside this directory
+#  eg. for a SOSEX calculation METHOD=sox
+METHOD=$1 
+# CNAME should correspond to the desired basis set for basis/jbas/cbas
+# at present only one basis name can be specified, but this could
+# be generalized in the future
+CNAME=$2
+# TESTSET should correspond to the particular test set you desire to run
+#   there should already be a directory sharing this name which contains
+#   a folder with the structures required for that test set.
+#   e.g. for S22, the directory S22 must already be made and contain
+#   the directory S22structures, which can be downloaded direclty from
+#   the GMTKN24 database.
+TSTSET=$3
+##########################
+## Initializations and Double Checks
+##########################
+if [ -z $CNAME ]; then
+  echo; echo no directory specified; echo
+  exit
+fi
+if [ -z $METHOD ]; then
+  echo; echo no method specified; echo
+  exit
+fi
+if [ -z $TSTSET ]; then
+  echo; echo no testset specified; echo
+  exit
+fi
+if [ -d $CNAME ]; then
+   echo; echo directory exists!; echo
+   exit
+fi
+if [ ! -d $TSTSET ]; then
+   echo; echo ERROR: no directory $TSTSET; echo
+   exit
+fi
+OUTFILE=`pwd`/$TSTSET/energy.$METHOD
+if [ -f $OUTFILE ]; then
+   echo; echo Existing result file $OUTFILE found
+   echo; exit
+fi
+structs=`pwd`/$TSTSET/$TSTSET\structures
+if [ ! -d $TSTSET ]; then
+   echo; echo ERROR: no directory $TSTSET\structures; echo
+   exit
+fi
+if [ ! -d setupfiles ] ; then
+   echo; echo ERROR: no directory setupfiles; echo
+   exit
+fi
+topd=`pwd`
+##########################
+##     BEGIN SCRIPT     ## 
+##########################
+# go into the test set
+cd $TSTSET
+# create a directory for the desired basis set
+if [[ -d $CNAME.$METHOD ]] ; then
+   echo "$CNAME.$METHOD already exists..."
+   echo "move this directory elsewhere for a fresh start"
+   exit
+else
+   echo "creating directory $CNAME.$METHOD"
+   mkdir $CNAME.$METHOD
+fi
+# enter the desired basis set directory
+echo "starting to work on $CNAME.$METHOD"
+cd $CNAME.$METHOD
+# get a list of the different structures and start the setup loop
+for j in `ls $structs/.` 
+  do
+  if [ ! -d "$j" ]; then
+#
+# create working directory and enter
+    echo " starting $j "
+    mkdir $j
+    cd $j
+# bring setup coordinates over from structures directory
+    cp $structs/$j coord
+# check if this system has peculiar features and run 
+#  the appropriate setup
+    if grep -q + <<<$j; then
+      if [[ -f $topd/setupfiles/setup.$METHOD.cat ]] ; then
+         $topd/setupfiles/setup.$METHOD.cat $j $CNAME $OUTFILE
+      else
+         echo "################################################################"
+         echo "     No setup file available for cations    "
+         echo "     exiting setup, be sure to reset by deleting bad directories"
+         echo "################################################################"
+         exit
+      fi
+#      ../../../setup.$METHOD.cat $j $OUTFILE
+    elif grep -q - <<<$j; then
+      if [[ -f $topd/setupfiles/setup.$METHOD.an ]] ; then
+         $topd/setupfiles/setup.$METHOD.an $j $CNAME $OUTFILE
+      else
+         echo "################################################################"
+         echo "     No setup file available for anions    "
+         echo "     exiting setup, be sure to reset by deleting bad directories"
+         echo "################################################################"
+         exit
+      fi
+#      ../../../setup.$METHOD.an $j $OUTFILE
+    elif grep -q trip <<<$j; then
+      if [[ -f $topd/setupfiles/setup.$METHOD.trip ]] ; then
+         $topd/setupfiles/setup.$METHOD.trip $j $CNAME $OUTFILE
+      else
+         echo "################################################################"
+         echo "     No setup file available for triplets    "
+         echo "     exiting setup, be sure to reset by deleting bad directories"
+         echo "################################################################"
+         exit
+      fi
+#      ../../../setup.$METHOD.trip $j $OUTFILE
+    elif grep -q doub <<<$j; then
+      if [[ -f $topd/setupfiles/setup.$METHOD.doub ]] ; then
+         $topd/setupfiles/setup.$METHOD.doub $j $CNAME $OUTFILE
+      else
+         echo "################################################################"
+         echo "     No setup file available for doublets    "
+         echo "     exiting setup, be sure to reset by deleting bad directories"
+         echo "################################################################"
+         exit
+      fi
+    else
+      $topd/setupfiles/setup.$METHOD $j $CNAME $OUTFILE
+#      ../../../setup.$METHOD $j $CNAME $OUTFILE
+    fi
+# return to the basis set directory and move on to the next system
+    echo " end of $j "
+    cd ..
+  fi
+  done
+cd ..
+# return to the original top directory containing TESTSET
+cd ..
+
+echo " all done with setupTESTSET" 

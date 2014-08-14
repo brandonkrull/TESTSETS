@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+dft
+on
+func tpss
+grid 5
+*
+
+scf
+conv
+8
+iter
+150
+
+
+*
+

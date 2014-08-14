@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# bash script for single-point rimp2 energy on molekel
+#
+#
+# Input section
+#
+title=$1
+basis=$2
+define << EOF >define.out
+
+
+
+a coord
+*
+no
+b all $basis
+*
+eht
+
+
+n
+t
+*
+
+
+
+dft
+on
+func pwlda
+grid m5
+*
+mp2
+freeze
+end
+denconv	1d-8
+memory 6000
+*
+ri
+on
+m
+2000
+*
+scf
+conv
+8
+iter
+300
+
+*
+EOF
+FILE=control
+sed '1 i\$rpa correlation energy\n\$sosex\n\$gl2sing' -i $FILE
+#
+# Execution section
+#
+#dscf >dscf.out 
+#rimp2 > rimp2.out
+#actual -r
+#mp2prep -e
+#mpgrad > mpgrad.out
+#
+# Analysis
+#
+#erirpa=`awk '/RPA singlet/ {print $6}' rimp2.out`
+#erpa=`awk '/RPA correlation/ {print $6}' mpgrad.out`
+#diagtime=`awk '/total  diagiv\(wall/ {print $4}' rimp2.out`
+#rpainttime=`awk '/total  rpaln\(wall/ {print $4}' rimp2.out`
+#erimp2=`awk '/MP2-energy\(tot/ {print $4}' rimp2.out`
+#emp2=`awk '/MP2-energy\(tot/ {print $4}' mpgrad.out`
+#ENER=`tail -2 energy | head -1 | awk '{print $2}'`
+#echo $title $erirpa $erpa $diagtime $rpainttime >> ../../results
+#printf " %4s     %17.10f %17.10f\n" $2 $ENER+$erpa $ENER+$erirpa >> $3

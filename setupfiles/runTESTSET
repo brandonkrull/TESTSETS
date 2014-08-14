@@ -1,0 +1,59 @@
+#! /bin/bash
+#
+# bash script for running gmtkn24 benchmark sets
+# original : HENK ESHUIS
+# Adapted by : Jeb Bates
+# Date : Dec 2012 
+#
+# FILE should contain the queue submit script for the cluster to execute
+#   the calculation
+FILE=$1
+# METHOD is the name of the method used to generate the dir, $CNAME.$METHOD
+#	from setupTESTSET, this may differ from that of the name of FILE
+METHOD=$2
+# CNAME is the basis set of interest inside of directory TESTSET
+CNAME=$3
+# TESTSET is the particular testset director you want to investigate
+TESTSET=$4
+topd=`pwd`
+if [ -z $CNAME ]; then
+  echo; echo no directory specified; echo
+  exit
+fi
+if [ -z $METHOD ]; then
+  echo; echo no method specified; echo
+  exit
+fi
+if [ -z $TESTSET ]; then
+  echo; echo no testsetdirectory specified; echo
+  exit
+fi
+if [ -z $FILE ]; then
+  echo; echo no pbsjobfile specified; echo
+  exit
+fi
+#
+# Enter testest sirectory
+cd $TESTSET
+# and then the basis set directory
+cd $CNAME.$METHOD
+# get a list of the directories where jobs are waiting to be submitted 
+for j in `ls .`  ; do
+  if [[ -d $j ]] ; then
+  cd $j
+# copy over the runjob script
+  cp $topd/setupfiles/$1 .
+# copy over definp files
+  cp $topd/setupfiles/definp.nodft .
+# alter the name in the submit script 
+  sed "s/#PBS -N q40/#PBS -N $j.$METHOD/g" -i $FILE
+#  sed "s/#PBS -N jx.q40/#PBS -N jx.$j.$CNAME.$TESTSET/g" -i $FILE
+# submit to the cluster
+  qsub $1 >> ../calcs
+  echo "`pwd`" >> ../calcs
+# return and repeat
+  cd ..
+  fi
+done
+cd ..
+echo " all done with runTESTSET "

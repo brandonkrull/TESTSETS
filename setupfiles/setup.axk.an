@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# bash script for single-point rimp2 energy on molekel
+#
+#
+# Input section
+#
+title=$1
+basis=$2
+define << EOF >define.out
+
+
+
+a coord
+*
+no
+b all $basis
+*
+eht
+
+
+-1
+
+
+
+
+dft
+on
+func tpss
+grid m5
+*
+mp2
+denconv	1d-8
+memory 14000
+*
+ri
+on
+m
+2000
+*
+scf
+conv
+8
+iter
+300
+
+*
+EOF
+FILE=control
+sed '1 i\$rpa correlation energy\n\$sosex' -i $FILE

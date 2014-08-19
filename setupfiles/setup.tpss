@@ -24,8 +24,8 @@ eht
 
 dft
 on
-func pbe0
-grid 3
+func tpss
+grid 6
 *
 mp2
 denconv 1d-9

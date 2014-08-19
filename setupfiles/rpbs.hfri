@@ -119,19 +119,19 @@ unset OMP_NUM_THREADS
 actual -r
 dscf > dscf.out.hf
 sed -i 's/$scfiterlimit       50/$scfiterlimit       1/g' control
-#cpc ri
-#cd ri
-#cp ~/bin/def.ri .
-#define < def.ri > def.out
-#ridft > ri.out
-#grep exK ri.out | cut -c 33-48 > ../exK 
-#cd ..
-sed -i '1 i $dft\nfunctional lrsh\ngridsize 3\n$scftol 1d-12' control
-#sed -i '4 i $nlbeta 0d0' control
-sed -i '5 i $profile' control
-sed -i '6 i $scftol 1d-12' control
-~/bin/dscf > dscf.out.lrsh.screened
-grep "E_total" dscf.out.lrsh.screened > etotal
+cpc ri
+cd ri
+cp ~/bin/def.ri .
+define < def.ri > def.out
+ridft > ri.out
+grep exK | cut -c 33-48 > ../exK 
+cd ..
+#sed -i '1 i $dft\nfunctional lrsh\ngridsize 2\n$scftol 1d-12' control
+#sed -i '4 i $nlbeta 0d0'
+#sed -i '5 i $profile'
+#sed -i '6 i $scftol 1d-12'
+#~/bin/dscf > dscf.out.lrsh.screened
+#grep "E_total" dscf.out.lrsh.screened > etotal
 echo Job Done
 #-----------------------------------------------------------------------------------
 }

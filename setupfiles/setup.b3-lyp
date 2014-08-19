@@ -24,7 +24,7 @@ eht
 
 dft
 on
-func pbe0
+func b3-lyp
 grid 3
 *
 mp2

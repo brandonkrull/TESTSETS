@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# bash script for geometry optimizations with rirpa in TURBOMOLE
+# bash script for hf single point energy
 #
 #
 # Input section
@@ -12,6 +12,7 @@ define << EOF >define.out
 
 
 a coord
+ired
 *
 no
 b all $basis
@@ -22,20 +23,13 @@ eht
 
 
 
-dft
-on
-func pbe0
-grid 3
-*
-mp2
-denconv 1d-9
-*
 scf
 conv
 9
 iter
-150
+50
 
 *
 EOF
-
+FILE=control
+sed -i '1 i \$denconv 1d-10' $FILE

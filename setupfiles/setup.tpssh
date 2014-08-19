@@ -24,7 +24,7 @@ eht
 
 dft
 on
-func pbe0
+func tpssh
 grid 3
 *
 mp2

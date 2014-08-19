@@ -6,12 +6,12 @@
 
 # Job name:
 #----------------
-#PBS -N q40
+#PBS -N setupfiles.tpss
 #----------------
 
 # Queue name:
 #----------------
-#PBS -q mf_medium
+#PBS -q mf_short
 #----------------
 
 ######################
@@ -33,7 +33,7 @@
 # Example: #PBS -l nodes=4:ppn=8:qdr-core:neh2.8,mem=2000mb,file=40gb
 # syntax: number_of_nodes:processors_per_node:node_feature_1:node_feature_2[:feature3...],memory,disk,etc.
 #--------------
-#PBS -l nodes=1:ppn=1,mem=4gb,file=20gb
+#PBS -l nodes=1:ppn=1,mem=8gb,file=20gb
 #--------------
 
 # NOTE!! memory is per total job, but file is per process
@@ -116,22 +116,12 @@ pbs_startjob(){
 
 #Temporary fix for bad default number of threads
 unset OMP_NUM_THREADS
-actual -r
-dscf > dscf.out.hf
-sed -i 's/$scfiterlimit       50/$scfiterlimit       1/g' control
-#cpc ri
-#cd ri
-#cp ~/bin/def.ri .
-#define < def.ri > def.out
-#ridft > ri.out
-#grep exK ri.out | cut -c 33-48 > ../exK 
-#cd ..
-sed -i '1 i $dft\nfunctional lrsh\ngridsize 3\n$scftol 1d-12' control
-#sed -i '4 i $nlbeta 0d0' control
-sed -i '5 i $profile' control
-sed -i '6 i $scftol 1d-12' control
-~/bin/dscf > dscf.out.lrsh.screened
-grep "E_total" dscf.out.lrsh.screened > etotal
+
+dscf > dscf.out
+# jobex -ri -c 100
+# t2x > opt.xyz
+# t2x -c > last.xyz
+
 echo Job Done
 #-----------------------------------------------------------------------------------
 }

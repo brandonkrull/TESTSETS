@@ -126,7 +126,7 @@ sed -i 's/$scfiterlimit       50/$scfiterlimit       1/g' control
 #ridft > ri.out
 #grep exK ri.out | cut -c 33-48 > ../exK 
 #cd ..
-sed -i '1 i $dft\nfunctional lrsh\ngridsize 3\n$scftol 1d-12' control
+sed -i '1 i $dft\nfunctional lrsh\ngridsize 4\n$scftol 1d-12' control
 #sed -i '4 i $nlbeta 0d0' control
 sed -i '5 i $profile' control
 sed -i '6 i $scftol 1d-12' control

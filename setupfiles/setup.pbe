@@ -12,7 +12,6 @@ define << EOF >define.out
 
 
 a coord
-desy 1d-2
 *
 no
 b all $basis
@@ -30,11 +29,6 @@ grid 6
 *
 mp2
 denconv 1d-9
-*
-ri
-on
-m
-1000
 *
 scf
 conv

@@ -24,27 +24,17 @@ eht
 
 
 
-dft
-on
-func tpss
-grid 5
-*
 mp2
 memory 8000
 denconv 1d-10
 *
-ri
-on
-m
-2000
-*
 scf
 conv
-10
+9
 iter
 100
 
 *
 EOF
 FILE=control
-sed -i '1 i \$rpa correlation energy\n\$sosex' $FILE
+sed -i '1 i \$rpa correlation energy' $FILE

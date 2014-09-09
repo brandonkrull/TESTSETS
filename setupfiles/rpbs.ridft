@@ -33,7 +33,7 @@
 # Example: #PBS -l nodes=4:ppn=8:qdr-core:neh2.8,mem=2000mb,file=40gb
 # syntax: number_of_nodes:processors_per_node:node_feature_1:node_feature_2[:feature3...],memory,disk,etc.
 #--------------
-#PBS -l nodes=1:ppn=4,mem=8gb,file=10gb
+#PBS -l nodes=1:ppn=1,mem=2gb,file=10gb
 #--------------
 
 # NOTE!! memory is per total job, but file is per process
@@ -119,6 +119,7 @@ unset OMP_NUM_THREADS
 
 actual -r
  ridft > ridft.out
+ tac ridft.out | grep -m 1 Exc > xc.out
 # jobex -ri -c 100
 # t2x > opt.xyz
 # t2x -c > last.xyz

@@ -17,7 +17,7 @@
 
 # Partition name:
 #----------------
-#SBATCH --partition=mf_nes2.8
+#SBATCH --partition=mf_ilg2.3
 #----------------
 
 ######################
@@ -77,12 +77,15 @@ slurm_startjob(){
 
 module load intel
 ~/bin/dscf > out
-sed -i 's/$scfiterlimit       50/$scfiterlimit       1/g' control
+sed -i 's/150/1/' control
 cpc ini
-~/bin/dscf.x > dscf.pbe
+/gdata/furche/dscf.acgga.pbe > dscf.pbe
 cp ini/mos .
 sed -i 's/pbe/acpbe/' control
-~/bin/dscf.x > dscf.acpbe
+/gdata/furche/dscf.acgga.pbe > dscf.acpbe
+cp ini/mos .
+sed -i 's/acpbe/tpss/' control
+/gdata/furche/dscf.acgga.pbe > dscf.tpss
 rm -r ini 
 grep Exc dscf.* > res.out
 

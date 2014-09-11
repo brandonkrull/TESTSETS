@@ -7,14 +7,18 @@
 #
 title=$1
 basis=$2
+echo "TPSS will be used to generate the semi-local reference"
 define << EOF >define.out
 
 
 
 a coord
+desy
+
 *
 no
 b all $basis
+
 *
 eht
 
@@ -22,26 +26,22 @@ eht
 
 
 
-ri
-on
 
-
-cc
-cbas
-
-ricc2
-model ccsd(t)
-
+dft
+func tpss
+gridsize m5
 *
+mp2
 memory 8000
-denconv 1d-8
+denconv 1d-10
 *
 scf
 conv
-8
+9
 iter
 100
 
 *
 EOF
-
+FILE=control
+sed -i '1 i \$rpa correlation energy' $FILE

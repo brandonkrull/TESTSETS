@@ -17,7 +17,7 @@
 
 # Partition name:
 #----------------
-#SBATCH --partition=mf_nes2.8
+#SBATCH --partition=mf_ilg2.3
 #----------------
 
 ######################

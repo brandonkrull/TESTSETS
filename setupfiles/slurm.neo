@@ -41,7 +41,7 @@
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=8000mb
+#SBATCH --mem-per-cpu=4000mb
 #SBATCH --time=300:00:00
 # SBATCH --licenses=foo:4,bar
 #--------------
@@ -77,8 +77,9 @@ slurm_startjob(){
 
 module load intel
 ~/bin/dscf > dscf.out
-/work/cluster/bkrull/TURBOIMG/scripts/mp2prep -e -m 6000
-sed -i '1 i \$dft\nfunctional neo\ngridsize 3' control
+kdg dft
+/work/cluster/bkrull/TURBOIMG/scripts/mp2prep -e -m 4000
+sed -i '1 i $dft\n functional neo\ngridsize m5' control
 ~/bin/mpgrad > neo.out
 #module load turbomole/6.6/intel
 
@@ -93,8 +94,6 @@ sed -i '1 i \$dft\nfunctional neo\ngridsize 3' control
 #else
 #  unset PARNODES
 #fi
-
-~/bin/dscf.new > dscf.out
 
 echo Job Done
 #-----------------------------------------------------------------------------------

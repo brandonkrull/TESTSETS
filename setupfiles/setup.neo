@@ -24,6 +24,10 @@ eht
 
 
 
+dft
+func tpss
+grid m5
+*
 mp2
 memory 8000
 denconv 1d-10

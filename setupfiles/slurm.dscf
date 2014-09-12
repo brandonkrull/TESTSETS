@@ -76,13 +76,39 @@ slurm_startjob(){
 # mpiexec --report-bindings  /modfac/bin/cp2k.popt_2.2.163 H2O-128.inp > H2O-128.out-$SLURM_JOB_ID
 
 module load intel
-~/bin/dscf > out
-sed -i 's/$scfiterlimit       50/$scfiterlimit       1/g' control
+export TURBODIR=/gdata/furche/turbomole
+source $TURBODIR/Config_turbo_env
+dscf > out
+sed -i 's/150/1/' control
 cpc ini
-~/bin/dscf.x > dscf.pbe
+dscf > dscf.pbe
 cp ini/mos .
-sed -i 's/pbe/acpbe/' control
-~/bin/dscf.x > dscf.acpbe
+sed -i 's/pbe/pbe0/' control
+dscf > dscf.pbe0
+cp ini/mos .
+sed -i 's/pbe0/acgga/' control
+dscf > dscf.acgga
+cp ini/mos .
+sed -i 's/acgga/acgga0/' control
+dscf > dscf.acgga0
+cp ini/mos .
+sed -i 's/acgga0/b-acgga/' control
+dscf > dscf.b-acgga
+cp ini/mos .
+sed -i 's/b-acgga/b-acgga0/' control
+dscf > dscf.b-acgga0
+cp ini/mos .
+sed -i 's/b-acgga0/b-lyp/' control
+dscf > dscf.b-lyp
+cp ini/mos .
+sed -i 's/b-lyp/b3-lyp/' control
+dscf > dscf.b3-lyp
+cp ini/mos .
+sed -i 's/b3-lyp/tpss/' control
+dscf > dscf.tpss
+cp ini/mos .
+sed -i 's/tpss/tpssh/' control
+dscf > dscf.tpssh
 rm -r ini 
 grep Exc dscf.* > res.out
 

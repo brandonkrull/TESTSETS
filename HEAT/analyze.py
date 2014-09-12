@@ -14,19 +14,23 @@ import numpy  as np
 import pandas as pd
 
 
-def get_energies(m):
+KJ_MOL_IN_AU = 2625.49962
+
+funs = ['pbe', 'pbe0', 'acgga', 'acgga0', 'b-acgga', 'b-acgga0',
+        'b-lyp', 'b3-lyp', 'tpss', 'tpssh']
+atoms = ['h', 'c', 'n', 'o', 'f']
+
+def get_energy(m, fun):
     """
     Extract the (pbe, non-scf-acpbe, non-scf-tpss) total energies for a given
-    molecule m.
+    molecule m and given functional fun.
     """
-    energies = np.zeros(3)
-    for i, calc in enumerate(['pbe', 'acpbe', 'tpss']):
-        out = open(m + '/dscf.' + calc, 'rU').read()
-        match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
-        assert match
-        energies[i] = float(match.group(1))
+    out = open(m + '/dscf.' + fun, 'rU').read()
+    match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
+    assert match
+    energy = float(match.group(1))
 
-    return energies
+    return energy
 
 
 def get_atoms(m):
@@ -39,41 +43,32 @@ def get_atoms(m):
     return atoms
 
 
-atoms = ['h', 'c', 'n', 'o', 'f']
-
-en_atoms = {}
-for atom in atoms:
-    en_atoms[atom] = get_energies(atom)
-
 # CCSDTQ SC+SO relativistic calc. from Tajti et al. JCP 121, 11599 (2004)
 # Energies in kJ/mol
 mol_data = pd.read_csv('../ref/HEAT_CCSDTQ_rel.csv')
+mol_data['Ea CCSDTQ'] = mol_data['Total'] - mol_data['ZPE'] - mol_data['DBOC'] \
+                      - mol_data['scalar rel'] - mol_data['SO rel']
 mols = [m.lower() for m in mol_data['molecule']]
 
-ae_mols = np.zeros([len(mols), 3])
-for i, mol in enumerate(mols):
-    en_mol = get_energies(mol)
-    atoms_in_mol = get_atoms(mol)
-    sum_en_atoms = np.sum([en_atoms[a] for a in atoms_in_mol], axis=0)
-    ae_mol = sum_en_atoms - en_mol
-    ae_mols[i] = ae_mol
+mae = {}
+for fun in funs:
+    ae_mols = np.zeros(len(mols))
+    for i, mol in enumerate(mols):
+        en_mol = get_energy(mol, fun)
+        atoms_in_mol = get_atoms(mol)
+        sum_en_atoms = sum([get_energy(a, fun) for a in atoms_in_mol])
+        ae_mols[i] = sum_en_atoms - en_mol
+    # convert from Hartree to kJ/mol
+    mol_data[fun] = ae_mols * KJ_MOL_IN_AU
+    mol_data[fun + ' err.'] = mol_data[fun] - mol_data['Ea CCSDTQ']
+    mae[fun] = np.mean(np.abs(mol_data[fun + ' err.']))
 
-# convert from Hartree to kJ/mol
-ae_mols = ae_mols * 2625.49962
-mol_data['Ea CCSTDQ'] = mol_data['Total'] - mol_data['ZPE'] - mol_data['DBOC'] \
-                      - mol_data['scalar rel'] - mol_data['SO rel']
-mol_data['Ea PBE'] = ae_mols[:, 0]
-mol_data['Ea acPBE@PBE'] = ae_mols[:, 1]
-mol_data['Ea TPSS@PBE'] = ae_mols[:, 2]
-mol_data['err. PBE'] = mol_data['Ea PBE'] - mol_data['Ea CCSTDQ']
-mol_data['err. acPBE@PBE'] = mol_data['Ea acPBE@PBE'] - mol_data['Ea CCSTDQ']
-mol_data['err. TPSS@PBE'] = mol_data['Ea TPSS@PBE'] - mol_data['Ea CCSTDQ']
-
+pd.set_option('display.max_columns', 100)
 print mol_data
 print '\n'
-print 'MAE of PBE', np.mean(np.abs(mol_data['err. PBE'])), ' kJ/mol'
-print 'MAE of acPBE@PBE', np.mean(np.abs(mol_data['err. acPBE@PBE'])), ' kJ/mol'
-print 'MAE of TPSS@PBE', np.mean(np.abs(mol_data['err. TPSS@PBE'])), ' kJ/mol'
+for fun in funs:
+    print "MAE of", fun, "=", mae[fun], 'kJ/mol'
+
 
 
 

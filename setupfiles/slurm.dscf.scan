@@ -78,9 +78,15 @@ slurm_startjob(){
 module load intel
 export TURBODIR=/gdata/furche/turbomole
 source $TURBODIR/Config_turbo_env
-dscf > out
-sed -i 's/150/1/' control
+
+ANACONDA=~/anaconda/bin
+export PATH=$PATH:$ANACONDA
+alias python=$ANACONDA/python2.7
+$ANACONDA/python2.7 --version
+
+dscf > dscf.pbe
 cpc ini
+sed -i 's/150/1/' control
 dscf > dscf.pbe
 
 cp ini/mos .
@@ -90,14 +96,23 @@ dscf > dscf.pbe0
 
 cp ini/mos .
 cp ini/alpha ini/beta .
-sed -i 's/pbe0/acgga/' control
+sed -i 's/pbe0/b-lyp/' control
+dscf > dscf.b-lyp
+
+cp ini/mos .
+cp ini/alpha ini/beta .
+sed -i 's/b-lyp/b3-lyp/' control
+dscf > dscf.b3-lyp
+
+cp ini/mos .
+cp ini/alpha ini/beta .
+sed -i 's/b3-lyp/acgga/' control
 dscf > dscf.acgga
 
 cp ini/mos .
 cp ini/alpha ini/beta .
 sed -i 's/acgga/acgga0/' control
 dscf > dscf.acgga0
-
 
 cp ini/mos .
 cp ini/alpha ini/beta .
@@ -106,37 +121,12 @@ dscf > dscf.b-acgga
 
 cp ini/mos .
 cp ini/alpha ini/beta .
-sed -i 's/b-acgga/b-lyp/' control
-dscf > dscf.b-lyp
+sed -i 's/b-acgga/b-acgga0/' control
+dscf > dscf.b-acgga0
 
-cp ini/mos .
-cp ini/alpha ini/beta .
-sed -i 's/b-lyp/b3-lyp/' control
-dscf > dscf.b3-lyp
-# cp ini/mos .
-# sed -i 's/pbe0/acgga/' control
-# dscf > dscf.acgga
-# cp ini/mos .
-# sed -i 's/acgga/acgga0/' control
-# dscf > dscf.acgga0
-# cp ini/mos .
-# sed -i 's/acgga0/b-acgga/' control
-# dscf > dscf.b-acgga
-# cp ini/mos .
-# sed -i 's/b-acgga/b-acgga0/' control
-# dscf > dscf.b-acgga0
-# cp ini/mos .
-# sed -i 's/b-acgga0/b-lyp/' control
-# dscf > dscf.b-lyp
-# cp ini/mos .
-# sed -i 's/b-lyp/b3-lyp/' control
-# dscf > dscf.b3-lyp
-# cp ini/mos .
-# sed -i 's/b3-lyp/tpss/' control
-# dscf > dscf.tpss
-# cp ini/mos .
-# sed -i 's/tpss/tpssh/' control
-# dscf > dscf.tpssh
+sed -i '1 i \$acgga ' control
+
+$ANACONDA/python2.7 ../scan.py
 
 rm -r ini 
 grep Exc dscf.* > res.out

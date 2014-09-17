@@ -1,1 +1,6 @@
 scripts to set up and run test sets can be found in ./setupfiles/
+
+Scripts to scan the percentage of exact exchange (runTESTSET.slurm.scan,
+scan.py, slurm.dscf.scan) can only be used with a modified version of
+Turbomole, where the percentage of exact exchange is epecified in
+the $acgga keyword in the control file.

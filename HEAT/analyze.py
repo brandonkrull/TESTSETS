@@ -16,9 +16,15 @@ import pandas as pd
 
 KJ_MOL_IN_AU = 2625.49962
 
-funs = ['pbe', 'pbe0', 'acgga', 'acgga0', 'b-acgga', 'b-acgga0',
-        'b-lyp', 'b3-lyp', 'tpss', 'tpssh']
-atoms = ['h', 'c', 'n', 'o', 'f']
+funs = ['pbe', 'pbe0', 'b-lyp', 'b3-lyp', 'acgga', 'acgga0', 'b-acgga', 'b-acgga0']
+for f in ['acgga0', 'b-acgga0']:
+    for exx in np.arange(0.12, 0.23, 0.01):
+        suffix = "{:.3f}".format(exx).split(".")[1]
+        funs.append(f + "." + suffix)
+
+# funs = ['pbe',
+#         'b-acgga0.100', 'b-acgga0.150', 'b-acgga0.200', 'b-acgga0.250',
+#         'acgga0.100', 'acgga0.150', 'acgga0.200', 'acgga0.250']
 
 def get_energy(m, fun):
     """
@@ -43,7 +49,8 @@ def get_atoms(m):
     return atoms
 
 
-# CCSDTQ SC+SO relativistic calc. from Tajti et al. JCP 121, 11599 (2004)
+# CCSDTQ calc. from Tajti et al. JCP 121, 11599 (2004)
+# Take the CCSDTQ nonrelativistic calc. without vibration correction as ref.
 # Energies in kJ/mol
 mol_data = pd.read_csv('../ref/HEAT_CCSDTQ_rel.csv')
 mol_data['Ea CCSDTQ'] = mol_data['Total'] - mol_data['ZPE'] - mol_data['DBOC'] \
@@ -62,6 +69,7 @@ for fun in funs:
     mol_data[fun] = ae_mols * KJ_MOL_IN_AU
     mol_data[fun + ' err.'] = mol_data[fun] - mol_data['Ea CCSDTQ']
     mae[fun] = np.mean(np.abs(mol_data[fun + ' err.']))
+    print "fun =", fun
 
 pd.set_option('display.max_columns', 100)
 print mol_data

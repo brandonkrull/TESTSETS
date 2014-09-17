@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# Define input for PBE singlepoint calculation with symmetry
+#
+# Input section
+#
+title=$1
+basis=$2
+define << EOF >define.out
+
+
+
+a coord
+desy
+*
+no
+b all $basis
+*
+eht
+
+
+n
+u 2
+*
+
+
+
+dft
+on
+func pbe
+grid 6
+*
+mp2
+denconv 1d-9
+*
+scf
+conv
+9
+iter
+150
+
+*
+EOF
+
+# Check whether there is spontaneous symmetry breaking
+if grep -q "define ended abnormally" define.out; then
+ls * | grep -v coord | xargs rm
+define << EOF >define.out
+
+
+
+a coord
+*
+no
+b all $basis
+*
+eht
+
+
+n
+u 2
+*
+
+
+
+dft
+on
+func pbe
+grid 6
+*
+mp2
+denconv 1d-9
+*
+scf
+conv
+9
+iter
+150
+
+*
+EOF
+fi
+

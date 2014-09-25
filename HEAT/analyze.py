@@ -14,27 +14,61 @@ import numpy  as np
 import pandas as pd
 
 
-KJ_MOL_IN_AU = 2625.49962
+KJ_MOL_IN_AU = 2625.499630
+KJ_MOL_IN_KCAL_MOL = 627.5095/2625.499630
 
-funs = ['pbe', 'pbe0', 'b-lyp', 'b3-lyp', 'acgga', 'acgga0', 'b-acgga', 'b-acgga0']
-for f in ['acgga0', 'b-acgga0']:
-    for exx in np.arange(0.12, 0.23, 0.01):
-        suffix = "{:.3f}".format(exx).split(".")[1]
-        funs.append(f + "." + suffix)
-
-# funs = ['pbe',
-#         'b-acgga0.100', 'b-acgga0.150', 'b-acgga0.200', 'b-acgga0.250',
-#         'acgga0.100', 'acgga0.150', 'acgga0.200', 'acgga0.250']
+funs = ['neo','rpa','axk','sosex','pbe','pbe0','b3-lyp']
 
 def get_energy(m, fun):
     """
     Extract the (pbe, non-scf-acpbe, non-scf-tpss) total energies for a given
     molecule m and given functional fun.
     """
-    out = open(m + '/dscf.' + fun, 'rU').read()
-    match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
-    assert match
-    energy = float(match.group(1))
+    if fun == 'neo':
+        out = open(m + '/ri/ridft.out', 'rU').read()
+        cor = open(m + '/neo.out', 'rU').read()
+        match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
+        cormatch = re.search(r'RPA correlation energy\s*\:\s*(-\d+\.\d+)D([-+]\d+)',cor)
+        assert match 
+        assert cormatch 
+        energy = float(match.group(1))
+        energy = energy+float(cormatch.group(1))*10**(float(cormatch.group(2)))
+
+    elif fun == 'rpa':
+        out = open(m + '/ri/ridft.out', 'rU').read()
+        cor = open(m + '/axk.out', 'rU').read()
+        match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
+        cormatch = re.search(r'RPA correlation energy\s*\:\s*(-\d+\.\d+)E([-+]\d+)',cor)
+        assert match 
+        assert cormatch
+        energy = float(match.group(1))
+        energy = energy+float(cormatch.group(1))*10**(float(cormatch.group(2)))
+
+    elif fun == 'axk':
+        out = open(m + '/ri/ridft.out', 'rU').read()
+        cor = open(m + '/axk.out', 'rU').read()
+        match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
+        cormatch = re.search(r'AXK\s*correlation energy\s*\:\s*(\-\d\.\d+)E([-+]\d+)',cor)
+        assert match 
+        assert cormatch 
+        energy = float(match.group(1))
+        energy = energy+float(cormatch.group(1))*10**(float(cormatch.group(2)))
+
+    elif fun == 'sosex':
+        out = open(m + '/ri/ridft.out', 'rU').read()
+        cor = open(m + '/axk.out', 'rU').read()
+        match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
+        cormatch = re.search(r'ACSOSEX\s*correlation energy\s*\:\s*([-\s]\d\.\d+)E([-+]\d+)',cor)
+        assert match 
+        assert cormatch 
+        energy = float(match.group(1))
+        energy = energy+float(cormatch.group(1))*10**(float(cormatch.group(2)))
+
+    else:
+        out = open(m + '/dscf.' + fun, 'rU').read()
+        match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
+        assert match
+        energy = float(match.group(1)) 
 
     return energy
 
@@ -69,14 +103,9 @@ for fun in funs:
     mol_data[fun] = ae_mols * KJ_MOL_IN_AU
     mol_data[fun + ' err.'] = mol_data[fun] - mol_data['Ea CCSDTQ']
     mae[fun] = np.mean(np.abs(mol_data[fun + ' err.']))
-    print "fun =", fun
 
 pd.set_option('display.max_columns', 100)
 print mol_data
 print '\n'
 for fun in funs:
-    print "MAE of", fun, "=", mae[fun], 'kJ/mol'
-
-
-
-
+    print "MAE of", fun, "=", mae[fun]*KJ_MOL_IN_KCAL_MOL, 'kcal/mol' 

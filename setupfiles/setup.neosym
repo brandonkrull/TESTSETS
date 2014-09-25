@@ -28,11 +28,12 @@ eht
 
 
 dft
+on
 func tpss
 gridsize m5
 *
 mp2
-memory 8000
+memory 4000
 denconv 1d-10
 *
 scf

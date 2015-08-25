@@ -7,7 +7,7 @@
 
 # Job name:
 #----------------
-#SBATCH --job-name="test"
+#SBATCH --job-name=setupfiles.neo
 #----------------
 
 # Account name (semi-optional):
@@ -75,17 +75,15 @@ slurm_startjob(){
 # g03 input.com
 # mpiexec --report-bindings  /modfac/bin/cp2k.popt_2.2.163 H2O-128.inp > H2O-128.out-$SLURM_JOB_ID
 
-module load intel
-dscf > dscf.out
+ridft > ridft.out
 kdg dft
-mp2prep -e -m 4000
-sed -i '1 i $dft\n functional neo\ngridsize 2' control
-export PATH=$HOME/bin:$PATH
-~/mpgrad.ff.0922 > neo.out
-#module load turbomole/6.6/intel
-
-#export TURBODIR=/work/cluster/nate/TURBOMOLE_6.6_intel
-#source $TURBODIR/Config_turbo_env
+kdg scfiterlimit
+sed -i '1 i \$scfiterlimit 1' control
+ridft > ridft.hf
+mp2prep -e -m 2500 $(pwd)
+sed -i '1 i \$dft\nfunctional neo\ngridsize 4\n\$sosex' control 
+/work/cluster/bkrull/kernel/TURBOMOLE/bin/`sysname`/mpgrad > neo.out
+rm moint* quasy ddens recst*
 
 # Turbomole parallel setup:
 #if (( $SLURM_NTASKS > 1 )); then

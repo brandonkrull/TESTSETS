@@ -17,11 +17,12 @@ import pandas as pd
 KJ_MOL_IN_AU = 2625.49962
 J_IN_CAL = 4.1868
 
-funs = ['pbe', 'pbe0', 'b-lyp', 'b3-lyp', 'acgga', 'acgga0', 'b-acgga', 'b-acgga0']
-for f in ['acgga0', 'b-acgga0']:
-    for exx in np.arange(0.12, 0.23, 0.01):
-        suffix = "{:.3f}".format(exx).split(".")[1]
-        funs.append(f + "." + suffix)
+#funs = ['pbe', 'pbe0', 'b-lyp', 'b3-lyp', 'acgga', 'acgga0', 'b-acgga', 'b-acgga0']
+funs = ['pbe', 'b3-lyp','tpss','tpssh','b-p','lrsh']
+#for f in ['acgga0', 'b-acgga0']:
+#    for exx in np.arange(0.12, 0.23, 0.01):
+#        suffix = "{:.3f}".format(exx).split(".")[1]
+#        funs.append(f + "." + suffix)
 
 # funs = ['pbe',
 #         'b-acgga0.100', 'b-acgga0.150', 'b-acgga0.200', 'b-acgga0.250',

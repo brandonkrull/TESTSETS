@@ -17,7 +17,7 @@
 
 # Partition name:
 #----------------
-#SBATCH --partition=mf_ilg2.3
+#SBATCH --partition=mf_nes2.8
 #----------------
 
 ######################
@@ -41,8 +41,8 @@
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=2000mb
-#SBATCH --time=3:00:00
+#SBATCH --mem-per-cpu=4000mb
+#SBATCH --time=300:00:00
 # SBATCH --licenses=foo:4,bar
 #--------------
 
@@ -68,32 +68,36 @@ nnodes=$SLURM_JOB_NUM_NODES
 
 slurm_startjob(){
 #----------------- Actual calculation command goes here: ---------------------------
+module load intel turbomole
 
-# Examples:
-#ridft > ridft.out
-# jobex -ri -c 40
-# g03 input.com
-# mpiexec --report-bindings  /modfac/bin/cp2k.popt_2.2.163 H2O-128.inp > H2O-128.out-$SLURM_JOB_ID
+actual -r
+kdg dft
+sed -i '1 i $scftol 1d-12\n$profile\n$dft\nfunctional tpss\nreference' control
+dscf > dscf.tpss.gen
+kdg scfiterlimit
+sed -i '1 i $scfiterlimit 1' control
+cpc ini
 
-module load intel
-export TURBODIR=/gdata/furche/turbomole_acgga
-source $TURBODIR/Config_turbo_env
-dscf > dscf.out
-#cpc ini
-#
-#cp ini/mos .
-#cp ini/alpha ini/beta .
-#sed -i 's/pbe/pbe0/' control
-#dscf > dscf.pbe0
-#
-#cp ini/mos .
-#cp ini/alpha ini/beta .
-#sed -i 's/b-lyp/b3-lyp/' control
-#dscf > dscf.b3-lyp
-#
-#rm -r ini 
-#grep Exc dscf.* > res.out
+for i in pbe pbe0 tpss tpssh b3-lyp b-p; do
+    cp ini/* .
+    kdg dft
+    sed -i '1 i $dft\nfunctional '$i'\nreference' control
+    dscf > dscf.$i
+done
+#ri---
+    cpc ri
+    cd ri
+    define < ~yujm1/bin/def.ri > def.out
+    kdg dft
+    ridft > ri.out
+    #grep exK ri.out | cut -c 33-48 > ../exK 
+    cd ..
+#-----
 
+cp ini/* .
+kdg dft
+sed -i '1 i $rshexp 1\n$dft\nfunctional lrsh\ngridsize 3' control
+~/dscf> dscf.lrsh.ksps  
 
 echo Job Done
 #-----------------------------------------------------------------------------------

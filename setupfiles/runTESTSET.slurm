@@ -53,8 +53,8 @@ for j in `ls .`  ; do
   sed 's/#SBATCH --job-name="test"/#SBATCH --job-name='${j}.${METHOD}'/' -i $FILE
 #  sed "s/#PBS -N jx.q40/#PBS -N jx.$j.$CNAME.$TESTSET/g" -i $FILE
 # submit to the cluster
-  sbatch $1 >> ../calcs
-  echo "`pwd`" >> ../calcs
+  sbatch $1 #>> ../calcs
+  #echo "`pwd`" >> ../calcs
 # return and repeat
   cd ..
   fi

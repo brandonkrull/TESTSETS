@@ -17,7 +17,7 @@
 
 # Partition name:
 #----------------
-#SBATCH --partition=mf_ilg2.3
+#SBATCH --partition=mf_nes2.8
 #----------------
 
 ######################
@@ -41,8 +41,8 @@
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=2000mb
-#SBATCH --time=3:00:00
+#SBATCH --mem-per-cpu=4000mb
+#SBATCH --time=30:00:00
 # SBATCH --licenses=foo:4,bar
 #--------------
 
@@ -78,7 +78,24 @@ slurm_startjob(){
 module load intel
 export TURBODIR=/gdata/furche/turbomole_acgga
 source $TURBODIR/Config_turbo_env
-dscf > dscf.out
+
+actual -r
+dscf > dscf.out.hf
+kdg scfiterlimit
+sed -i '1 i $scfiterlimit 1' control
+sed -i '1 i $nonlscreen' control
+cpc ri
+cd ri
+define < ~yujm1/bin/def.ri > def.out
+ridft > ri.out
+grep exK ri.out | cut -c 33-48 > ../exK 
+cd ..
+sed -i '1 i $dft\nfunctional lrsh\ngridsize 3\n$scftol 1d-12' control
+sed -i '4 i $nlbeta 0d0' control
+sed -i '5 i $profile' control
+sed -i '6 i $scftol 1d-12' control
+~/dscf > dscf.out.lrsh.screened
+grep "E_total" dscf.out.lrsh.screened > etotal
 #cpc ini
 #
 #cp ini/mos .

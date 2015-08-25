@@ -25,12 +25,18 @@ eht
 
 
 dft
+on
 func tpss
-grid m5
+grid 5
 *
 mp2
 memory 8000
 denconv 1d-10
+*
+ri
+on
+m
+2000
 *
 scf
 conv

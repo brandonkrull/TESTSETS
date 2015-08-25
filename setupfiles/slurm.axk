@@ -41,7 +41,7 @@
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=2000mb
+#SBATCH --mem-per-cpu=4000mb
 #SBATCH --time=3:00:00
 # SBATCH --licenses=foo:4,bar
 #--------------
@@ -79,21 +79,19 @@ module load intel
 export TURBODIR=/gdata/furche/turbomole_acgga
 source $TURBODIR/Config_turbo_env
 dscf > dscf.out
-#cpc ini
-#
-#cp ini/mos .
-#cp ini/alpha ini/beta .
-#sed -i 's/pbe/pbe0/' control
-#dscf > dscf.pbe0
-#
-#cp ini/mos .
-#cp ini/alpha ini/beta .
-#sed -i 's/b-lyp/b3-lyp/' control
-#dscf > dscf.b3-lyp
-#
-#rm -r ini 
-#grep Exc dscf.* > res.out
+kdg dft
+mp2prep -e -m 8000
+mpgrad> axk.out
+rm moint* quasy ddens recst*
 
+# Turbomole parallel setup:
+#if (( $SLURM_NTASKS > 1 )); then
+#  export PARA_ARCH=MPI
+#  source $TURBODIR/Config_turbo_env
+#  export PARNODES=$SLURM_NTASKS
+#else
+#  unset PARNODES
+#fi
 
 echo Job Done
 #-----------------------------------------------------------------------------------

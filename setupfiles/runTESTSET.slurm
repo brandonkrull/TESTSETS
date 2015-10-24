@@ -19,6 +19,8 @@ METHOD=$2
 CNAME=$3
 # TESTSET is the particular testset director you want to investigate
 TESTSET=$4
+# MORE PROCS PLZ
+NCPUS=$5
 topd=`pwd`
 if [ -z $CNAME ]; then
   echo; echo no directory specified; echo
@@ -53,6 +55,7 @@ for j in `ls .`  ; do
   sed 's/#SBATCH --job-name="test"/#SBATCH --job-name='${j}.${METHOD}'/' -i $FILE
 #  sed "s/#PBS -N jx.q40/#PBS -N jx.$j.$CNAME.$TESTSET/g" -i $FILE
 # submit to the cluster
+  sed -i "s/\(\-\-tasks\-per\-node\=\)\(.*\)/\1$NCPUS/" $FILE
   sbatch $1 #>> ../calcs
   #echo "`pwd`" >> ../calcs
 # return and repeat

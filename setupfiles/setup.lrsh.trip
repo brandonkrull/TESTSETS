@@ -31,7 +31,12 @@ conv
 iter
 50
 
+mp2
+denconv
+1d-10
+
+*
 *
 EOF
-FILE=control
-sed -i '1 i \$denconv 1d-10' $FILE
+#FILE=control
+#sed -i '1 i \$denconv 1d-10' $FILE

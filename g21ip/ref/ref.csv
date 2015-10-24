@@ -1,0 +1,44 @@
+#Ionization potentials are computed by subtracting the total energy of the
+#neutral species from the cationic species
+#1 x (Total Energy of "li+") - 1 x (Total Energy of "li") = 123.3
+#
+#Values reported here are in kcal/mol from reference
+#Curtiss, L. A..; Raghavachari, K.; Trucks G. W.; 
+#Pople, J. A. J. Chem. Phys. 1991, 94, 7221-7230.  
+molecule,total
+h, 314.9  
+li, 123.3    
+be, 214.9    
+b, 190.4    
+c, 259.6    
+n, 335.3    
+o, 313.8    
+f, 401.7    
+na, 118.5    
+mg, 176.3    
+al, 138      
+si, 188      
+p, 241.9    
+s, 239      
+cl, 299.1    
+ch4, 296.339  
+nh3, 235.69   
+oh, 300.917  
+oh2, 292.648  
+fh, 371.311  
+sih4, 255.387  
+ph, 234.107  
+ph2, 226.367  
+ph3, 227.822  
+sh, 239.300  
+hcl, 294.459  
+c2h2, 264.585  
+c2h4, 243.709  
+co, 322.986  
+n2, 359.365  
+o2, 277.727  
+p2, 242.854  
+s2, 215.737  
+cl2, 265.083  
+fcl, 291.699  
+cs, 261.153  

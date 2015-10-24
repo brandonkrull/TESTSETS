@@ -1,0 +1,32 @@
+#!/bin/bash
+
+actual -r
+kdg dft
+gsed -i '1i\\$smp_cpus 4\n\$scftol 1d-12\n\$profile\n\$dft\nfunctional tpss\nreference' control
+dscf_smp > \scf.tpss.gen
+kdg scfiterlimit
+gsed -i '1i\\$scfiterlimit 1' control
+cpc ini
+
+for i in pbe pbe0 tpss tpssh b3-lyp b-p; do
+    cp ini/* .
+    kdg dft
+    gsed -i '1i\\$dft\nfunctional '$i'\nreference' control
+    dscf_smp > dscf.$i
+done
+##ri---
+#    cpc ri
+#    cd ri
+#    define < ~yujm1/bin/def.ri > def.out
+#    kdg dft
+#    ridft > ri.out
+#    #grep exK ri.out | cut -c 33-48 > ../exK 
+#    cd ..
+##-----
+
+cp ini/* .
+kdg dft
+gsed -i '1i\\$rshexp 3\n\$dft\nfunctional lrsh\ngridsize 3' control
+dscf_smp > dscf.lrsh.prop
+
+echo Job Done

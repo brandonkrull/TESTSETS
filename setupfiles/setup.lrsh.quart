@@ -17,9 +17,11 @@ no
 b all $basis
 *
 eht
-y
-+1
 
+
+n
+u 3
+*
 
 
 
@@ -31,8 +33,10 @@ iter
 
 mp2
 denconv
-1d-9
+1d-10
 
 *
 *
 EOF
+#FILE=control
+#sed -i '1 i \$denconv 1d-10' $FILE

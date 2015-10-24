@@ -91,7 +91,25 @@ for j in `ls $structs/.`
 #  the appropriate setup
     if grep -q + <<<$j; then
       if [[ -f $topd/setupfiles/setup.$METHOD.cat ]] ; then
-         $topd/setupfiles/setup.$METHOD.cat $j $CNAME $OUTFILE
+         if grep -q doub <<< $j; then
+            ##btk add spin multiplicity after 'charge' line in define script
+             u=1
+             sed "/\-1/a \n\nu $u/" $topd/setupfiles/setup.$method.cat > tmp
+             bash tmp $j $CNAME $OUTFILE
+             rm tmp
+         elif grep -q trip <<< $j; then
+             u=2
+             sed "/\-1/a \n\nu $u/" $topd/setupfiles/setup.$method.cat > tmp
+             bash tmp $j $CNAME $OUTFILE
+             rm tmp
+         elif grep -q quart <<< $j; then
+             u=3
+             sed "/\-1/a \n\nu $u/" $topd/setupfiles/setup.$method.cat > tmp
+             bash tmp $j $CNAME $OUTFILE
+             rm tmp
+         else
+             $topd/setupfiles/setup.$method.cat $j $CNAME $OUTFILE
+         fi
       else
          echo "################################################################"
          echo "     No setup file available for cations    "
@@ -99,13 +117,41 @@ for j in `ls $structs/.`
          echo "################################################################"
          exit
       fi
-#      ../../../setup.$METHOD.cat $j $OUTFILE
     elif grep -q - <<<$j; then
       if [[ -f $topd/setupfiles/setup.$METHOD.an ]] ; then
-         $topd/setupfiles/setup.$METHOD.an $j $CNAME $OUTFILE
+         if grep -q doub <<< $j; then
+            ##btk add spin multiplicity after 'charge' line in define script
+             u=1
+             sed "/\-1/a \n\nu $u" $topd/setupfiles/setup.$method.an > tmp
+             bash tmp $j $CNAME $OUTFILE
+             rm tmp
+         elif grep -q trip <<< $j; then
+             u=2
+             sed "/\-1/a \n\nu $u" $topd/setupfiles/setup.$method.an > tmp
+             bash tmp $j $CNAME $OUTFILE
+             rm tmp
+         elif grep -q quart <<< $j; then
+             u=3
+             sed "/\-1/a \n\nu $u" $topd/setupfiles/setup.$method.an > tmp
+             bash tmp $j $CNAME $OUTFILE
+             rm tmp
+         else
+             $topd/setupfiles/setup.$method.an $j $CNAME $OUTFILE
+         fi
       else
          echo "################################################################"
          echo "     No setup file available for anions    "
+         echo "     exiting setup, be sure to reset by deleting bad directories"
+         echo "################################################################"
+         exit
+      fi
+##BTK the following elif's are for non-charged specific spin-multiplicities
+    elif grep -q quart <<<$j; then
+      if [[ -f $topd/setupfiles/setup.$METHOD.quart ]] ; then
+         $topd/setupfiles/setup.$METHOD.quart $j $CNAME $OUTFILE
+      else
+         echo "################################################################"
+         echo "     No setup file available for triplets    "
          echo "     exiting setup, be sure to reset by deleting bad directories"
          echo "################################################################"
          exit

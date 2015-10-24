@@ -1,0 +1,33 @@
+#Electron affinities are computed by subtracting the total energy of the
+#anionic species from the neutral species
+#1 x (Total Energy of "c") - 1 x (Total Energy of "c-") = 123.3
+#
+#Values reported here are in kcal/mol from reference
+#Curtiss, L. A..; Raghavachari, K.; Trucks G. W.; 
+#Pople, J. A. J. Chem. Phys. 1991, 94, 7221-7230.  
+molecule,total
+c, 29.2
+o, 33.7
+f, 78.4
+si, 32.1
+p, 17.3
+s, 48.0
+cl, 83.5
+ch, 27.9
+ch2, 13.4
+ch3, 1.2
+nh, 8.3
+nh2, 16.8
+oh, 41.7
+sih, 29.3
+sih2, 25.1
+sih3, 31.4
+ph, 23.5
+ph2, 28.8
+sh, 54.2
+o2, 9.5
+no, -0.2
+cn, 89.5
+po, 24.9
+s2, 38.0
+cl2, 54.7

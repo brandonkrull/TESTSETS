@@ -94,21 +94,21 @@ for j in `ls $structs/.`
          if grep -q doub <<< $j; then
             ##btk add spin multiplicity after 'charge' line in define script
              u=1
-             sed "/\-1/a \n\nu $u/" $topd/setupfiles/setup.$method.cat > tmp
+             sed "/\+1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.cat > tmp
              bash tmp $j $CNAME $OUTFILE
              rm tmp
          elif grep -q trip <<< $j; then
              u=2
-             sed "/\-1/a \n\nu $u/" $topd/setupfiles/setup.$method.cat > tmp
+             sed "/\+1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.cat > tmp
              bash tmp $j $CNAME $OUTFILE
              rm tmp
          elif grep -q quart <<< $j; then
              u=3
-             sed "/\-1/a \n\nu $u/" $topd/setupfiles/setup.$method.cat > tmp
+             sed "/\+1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.cat > tmp
              bash tmp $j $CNAME $OUTFILE
              rm tmp
          else
-             $topd/setupfiles/setup.$method.cat $j $CNAME $OUTFILE
+             $topd/setupfiles/setup.$METHOD.cat $j $CNAME $OUTFILE
          fi
       else
          echo "################################################################"
@@ -122,21 +122,21 @@ for j in `ls $structs/.`
          if grep -q doub <<< $j; then
             ##btk add spin multiplicity after 'charge' line in define script
              u=1
-             sed "/\-1/a \n\nu $u" $topd/setupfiles/setup.$method.an > tmp
+             sed "/\-1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.an > tmp
              bash tmp $j $CNAME $OUTFILE
              rm tmp
          elif grep -q trip <<< $j; then
              u=2
-             sed "/\-1/a \n\nu $u" $topd/setupfiles/setup.$method.an > tmp
+             sed "/\-1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.an > tmp
              bash tmp $j $CNAME $OUTFILE
              rm tmp
          elif grep -q quart <<< $j; then
              u=3
-             sed "/\-1/a \n\nu $u" $topd/setupfiles/setup.$method.an > tmp
+             sed "/\-1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.an > tmp
              bash tmp $j $CNAME $OUTFILE
              rm tmp
          else
-             $topd/setupfiles/setup.$method.an $j $CNAME $OUTFILE
+             $topd/setupfiles/setup.$METHOD.an $j $CNAME $OUTFILE
          fi
       else
          echo "################################################################"

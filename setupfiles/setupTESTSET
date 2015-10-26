@@ -81,34 +81,32 @@ for j in `ls $structs/.`
   do
   if [ ! -d "$j" ]; then
 #
-# create working directory and enter
+# create working directory without spin multiplicity and enter
     echo " starting $j "
-    mkdir $j
-    cd $j
+    k=$(echo $j | sed 's/\..*/\ /')
+    mkdir $k
+    cd $k
+    touch $j
 # bring setup coordinates over from structures directory
     cp $structs/$j coord
 # check if this system has peculiar features and run 
 #  the appropriate setup
-    if grep -q + <<<$j; then
+    if grep -q + <<<$j; then #if cation
       if [[ -f $topd/setupfiles/setup.$METHOD.cat ]] ; then
-         if grep -q doub <<< $j; then
-            ##btk add spin multiplicity after 'charge' line in define script
-             u=1
-             sed "/\+1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.cat > tmp
-             bash tmp $j $CNAME $OUTFILE
-             rm tmp
-         elif grep -q trip <<< $j; then
-             u=2
-             sed "/\+1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.cat > tmp
-             bash tmp $j $CNAME $OUTFILE
-             rm tmp
-         elif grep -q quart <<< $j; then
-             u=3
-             sed "/\+1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.cat > tmp
-             bash tmp $j $CNAME $OUTFILE
-             rm tmp
+         if grep -q "\." <<<$j; then #if Sz > 0
+             if grep -q doub <<< $j; then
+                 u=1
+             elif grep -q trip <<< $j; then
+                 u=2
+             elif grep -q quart <<< $j; then
+                 u=3
+             fi
+
+             sed "/\+1/a \nn\nn\nu $u\n\*\n" $topd/setupfiles/setup.$METHOD.cat > tmp
+             bash tmp $k $CNAME $OUTFILE
+#             rm tmp
          else
-             $topd/setupfiles/setup.$METHOD.cat $j $CNAME $OUTFILE
+             $topd/setupfiles/setup.$METHOD.cat $k $CNAME $OUTFILE
          fi
       else
          echo "################################################################"
@@ -119,24 +117,20 @@ for j in `ls $structs/.`
       fi
     elif grep -q - <<<$j; then
       if [[ -f $topd/setupfiles/setup.$METHOD.an ]] ; then
-         if grep -q doub <<< $j; then
-            ##btk add spin multiplicity after 'charge' line in define script
-             u=1
-             sed "/\-1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.an > tmp
-             bash tmp $j $CNAME $OUTFILE
-             rm tmp
-         elif grep -q trip <<< $j; then
-             u=2
-             sed "/\-1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.an > tmp
-             bash tmp $j $CNAME $OUTFILE
-             rm tmp
-         elif grep -q quart <<< $j; then
-             u=3
-             sed "/\-1/a \nn\nn\nu $u\n\*\n/" $topd/setupfiles/setup.$METHOD.an > tmp
-             bash tmp $j $CNAME $OUTFILE
-             rm tmp
+         if grep -q "\." <<<$j; then # Sz > 0
+             if grep -q doub <<< $j; then
+                 u=1
+             elif grep -q trip <<< $j; then
+                 u=2
+             elif grep -q quart <<< $j; then
+                 u=3
+             fi
+
+             sed "/\-1/a \nn\nn\nu $u\n\*\n" $topd/setupfiles/setup.$METHOD.an > tmp
+             bash tmp $k $CNAME $OUTFILE
+#             rm tmp
          else
-             $topd/setupfiles/setup.$METHOD.an $j $CNAME $OUTFILE
+             $topd/setupfiles/setup.$METHOD.an $k $CNAME $OUTFILE
          fi
       else
          echo "################################################################"
@@ -145,42 +139,30 @@ for j in `ls $structs/.`
          echo "################################################################"
          exit
       fi
-##BTK the following elif's are for non-charged specific spin-multiplicities
-    elif grep -q quart <<<$j; then
-      if [[ -f $topd/setupfiles/setup.$METHOD.quart ]] ; then
-         $topd/setupfiles/setup.$METHOD.quart $j $CNAME $OUTFILE
+    else # neutral system, 
+      if [[ -f $topd/setupfiles/setup.$METHOD ]] ; then
+          if grep -q "\." <<<$j; then # Sz > 0
+              if grep -q doub <<< $j; then
+                  u=1
+              elif grep -q trip <<< $j; then
+                  u=2
+              elif grep -q quart <<< $j; then
+                  u=3
+              fi
+
+              sed "/eht/a \n\nn\nn\nu $u\n\*\n" $topd/setupfiles/setup.$METHOD > tmp
+              bash tmp $k $CNAME $OUTFILE
+#              rm tmp
+          else
+              $topd/setupfiles/setup.$METHOD.an $k $CNAME $OUTFILE
+          fi
       else
          echo "################################################################"
-         echo "     No setup file available for triplets    "
+         echo "     No setup file available for $METHOD    "
          echo "     exiting setup, be sure to reset by deleting bad directories"
          echo "################################################################"
          exit
       fi
-#      ../../../setup.$METHOD.an $j $OUTFILE
-    elif grep -q trip <<<$j; then
-      if [[ -f $topd/setupfiles/setup.$METHOD.trip ]] ; then
-         $topd/setupfiles/setup.$METHOD.trip $j $CNAME $OUTFILE
-      else
-         echo "################################################################"
-         echo "     No setup file available for triplets    "
-         echo "     exiting setup, be sure to reset by deleting bad directories"
-         echo "################################################################"
-         exit
-      fi
-#      ../../../setup.$METHOD.trip $j $OUTFILE
-    elif grep -q doub <<<$j; then
-      if [[ -f $topd/setupfiles/setup.$METHOD.doub ]] ; then
-         $topd/setupfiles/setup.$METHOD.doub $j $CNAME $OUTFILE
-      else
-         echo "################################################################"
-         echo "     No setup file available for doublets    "
-         echo "     exiting setup, be sure to reset by deleting bad directories"
-         echo "################################################################"
-         exit
-      fi
-    else
-      $topd/setupfiles/setup.$METHOD $j $CNAME $OUTFILE
-#      ../../../setup.$METHOD $j $CNAME $OUTFILE
     fi
 # return to the basis set directory and move on to the next system
     echo " end of $j "

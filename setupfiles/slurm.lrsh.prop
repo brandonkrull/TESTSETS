@@ -1,107 +1,55 @@
 #!/bin/bash
-#
-# Template script for SLURM jobs
-# Turbomole flavor
-# Note that "#SBATCH" is not a comment, but "# SBATCH" is (note the space after "#")
-# For the online manual for sbatch, type "man sbatch" in the terminal
-
-# Job name:
-#----------------
 #SBATCH --job-name="test"
-#----------------
-
-# Account name (semi-optional):
-#----------------
-# SBATCH --account=
-#----------------
-
-# Partition name:
-#----------------
-#SBATCH --partition=mf_i-b2.8
-#----------------
-
-######################
-# The possible job submission partitions are listed here.
-# Name:       CPU type:      Cores(Threads)/Node:  Speed:
-# mf_m-c1.9   1.9GHz AMD       48                  0.5
-# mf_ilg2.3   2.3GHz AMD       32(64)              0.7
-# mf_nes2.8   2.8GHz Intel     8(16)-12(24)        1.0
-#
-# Slurm schedules each processor core to a single job only. Multithreaded jobs
-# can take advantage of multiple threads per core. 
-# 
-# The 2.3GHz AMD nodes have 32 modules, each with 2 integer cores and 1 floating-
-# point core. Each module is scheduled as a single core with two threads.
-#
-######################
-
-# Specifying resources needed for run:
-#
-#--------------
+#SBATCH --partition=mf_ilg2.3
 #SBATCH --nodes=1
-#SBATCH --tasks-per-node=4
+#SBATCH --tasks-per-node=8
 #SBATCH --cpus-per-task=1
+#SBATCH --threads-per-core=1
 #SBATCH --mem-per-cpu=2000mb
 #SBATCH --time=300:00:00
-# SBATCH --licenses=foo:4,bar
-#--------------
-
-
-
-#########################################
-# Set copy_local to "yes" to copy contents of submission directory to node-local workspace.
-# After the calculation, results will be copied back and the temporary work directory
-# /work/$USER/$SLURM_JOB_ID will be deleted.
-#
-# If time runs out before the job is done, the copyback will be done by a post-execution
-# script, but only if the SLURM_WORK_DIR file (created in this script) exists in the
-# submission directory. 
 
 copy_local="yes"
 
-#########################################
-
-# Define some simpler local evironment variables:
 nprocs=$SLURM_NTASKS
 nnodes=$SLURM_JOB_NUM_NODES
 
-
 slurm_startjob(){
 #----------------- Actual calculation command goes here: ---------------------------
-export TURBODIR=/work/cluster/bkrull/lrsh PARA_ARCH=SMP
+module load intel 
+export TURBODIR=/work/cluster/bkrull/lrsh PARA_ARCH=SMP OMP_NUM_THREADS=$nprocs
 source $TURBODIR/Config_turbo_env
-export OMP_NUM_THREADS=4
-export PATH=$TURBODIR/bin/`sysname`:$PATH
+env> env.out
+BETA=1d2
 
 actual -r
+kdg restart
 kdg dft
-sed -i '1 i $smp_cpus 4\n$scftol 1d-12\n$profile\n$dft\nfunctional tpss\nreference' control
+sed -i "1 i \$nlbeta $BETA\n\$rshexp 3\n\$nonlscreen\n\$scftol 1d-18\n\$profile\n\$dft\nfunctional tpss\ngridsize 3" control
 dscf_smp > dscf.tpss.gen
+
+cp mos mos.b
+cp alpha alpha.b
+cp beta beta.b
+
 kdg scfiterlimit
-sed -i '1 i $scfiterlimit 1' control
-cpc ini
+sed -i '1 i \$scfiterlimit 1' control
+sed -i 's/tpss/pbe/' control
+cp mos.b mos 
+cp alpha.b alpha
+cp beta.b beta
+dscf_smp > dscf.pbe
 
-for i in pbe pbe0 tpss tpssh b3-lyp b-p; do
-    cp ini/* .
-    kdg dft
-    sed -i '1 i $dft\nfunctional '$i'\nreference' control
-    dscf_smp > dscf.$i
-done
-#ri---
-    cpc ri
-    cd ri
-    define < ~yujm1/bin/def.ri > def.out
-    kdg dft
-    ridft > ri.out
-    #grep exK ri.out | cut -c 33-48 > ../exK 
-    cd ..
-#-----
-
-cp ini/* .
-kdg dft
-sed -i '1 i $rshexp 2\n$dft\nfunctional lrsh\ngridsize 4' control
+cp mos.b mos 
+cp alpha.b alpha
+cp beta.b beta
+sed -i 's/pbe/lrsh/' control
 dscf_smp > dscf.lrsh.prop
 
+kdg nonlscreen
+cp mos.b mos 
+cp alpha.b alpha
+cp beta.b beta
+dscf_smp > dscf.lrsh.prop.noscreen
 echo Job Done
 #-----------------------------------------------------------------------------------
 }

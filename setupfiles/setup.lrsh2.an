@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# bash script for hf single point energy
+#
+#
+# Input section
+#
+title=$1
+basis=$2
+define << EOF >define.out
+
+
+
+a coord
+*
+no
+b all $basis
+*
+eht
+y
+-1
+
+
+
+
+scf
+conv
+9
+iter
+50
+
+mp2
+denconv
+1d-9
+
+*
+*
+EOF

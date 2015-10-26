@@ -1,5 +1,5 @@
 """
-Script for calculating the atomization energies and comparing them with the
+Script for calculating the electron affinity and comparing them with the
 CCSDTQ results in the 2004 HEAT paper.
 
 Usage:
@@ -16,7 +16,7 @@ import pandas as pd
 
 KCAL_MOL_IN_AU = 627.5095
 
-fexst = os.getcwd()+'/h/dscf.'
+fexst = os.getcwd()+'/c/dscf.'
 funs =  [f.replace(fexst,'') for f in glob.glob(fexst+'*')]
 
 def get_energy(m, fun):
@@ -67,12 +67,6 @@ def get_energy(m, fun):
         energy = float(match.group(1))
         energy = energy+float(cormatch.group(1))*10**(float(cormatch.group(2)))
 
-#    elif fun.find('ksps') or fun.find('lmf') or fun.find('prop'): 
-#        out = open(m + '/dscf.' + fun, 'rU').read()
-#        match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
-#        assert match
-#        energy = float(match.group(1))
-      
     else: 
         out = open(m + '/dscf.' + fun, 'rU').read()
         match = re.search(r'total energy\s+=\s*(-\d+\.\d+)', out)
@@ -82,8 +76,7 @@ def get_energy(m, fun):
     return energy
 
 #reference data is in kcal/mol
-mol_data = pd.read_csv('../ref/ref.csv',comment='#',\
-        skip_blank_lines=True)
+mol_data = pd.read_csv('../ref/ref.csv',comment='#',skip_blank_lines=True)
 mols = [m.lower() for m in mol_data['molecule']]
 
 mse = {}
@@ -91,15 +84,12 @@ mae = {}
 max_p = {}
 max_m = {}
 for fun in funs:
-    ip_mols = np.zeros(len(mols))   # zero ips
+    ea_mols = np.zeros(len(mols))   # zero eas
     for i, mol in enumerate(mols): 
         en_mol = get_energy(mol, fun)   # get neutral total egy
-        if mol == 'h':
-            ip_mols[i] = -en_mol * KCAL_MOL_IN_AU # if hydrogen, there is no cation energy
-        else: 
-            en_mol_plus = get_energy(mol+'+', fun) # get cation total egy
-            ip_mols[i] = (en_mol_plus - en_mol)* KCAL_MOL_IN_AU # difference in kcal/mol
-    mol_data[fun] = ip_mols 
+        en_mol_neg = get_energy(mol+'-', fun) # get anion total egy
+        ea_mols[i] = (en_mol - en_mol_neg)* KCAL_MOL_IN_AU # difference in kcal/mol
+    mol_data[fun] = ea_mols 
     mol_data[fun + ' err.'] = (mol_data[fun] - mol_data['total'])
     mse[fun] = np.mean(mol_data[fun + ' err.'])
     mae[fun] = np.mean(np.abs(mol_data[fun + ' err.']))

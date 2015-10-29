@@ -1,0 +1,12 @@
+#+title: Things to be done for testing the testsets etc
+
+* Generalize analyze.py to compute ~any~ property 
+** Add in ways to compute additional properties 
+*** for now, g21ea, g21ip, heat, ae6, bh76, bh76rc
+*** ea, ip, atomization, barrier height
+
+* Add compare to e.g. pbe numbers functionality in analyze.py
+
+* Incorporate general analyze.py into test-all-the-thingies
+
+* Use test-all-the-thingies to test and analyze testsets

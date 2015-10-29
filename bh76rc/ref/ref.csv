@@ -1,0 +1,41 @@
+#Taken from Zhao, Y.; Lynch, B. J.; Truhlar, D. G. J. Phys. Chem. A 2004, 108, 2715-2719;
+#and Zhao, Y.; Gonzalez-Garcia, N.; Truhlar, D. G. J. Phys. Chem. A 2005, 109, 2012-2018.
+#(W1 and theoretical estimates); all values are in kcal/mol.
+#
+#For each reaction, the relevant systems' names, the stoichiometry and the reference value are given. 
+#The systems' names refer to the geometry files. 
+#Negative values in the stoichiometry columns refer to reactants, positive values to products. 
+#Example for reaction 1:
+#-1 x (Total Energy of "h") - 1 x (Total Energy of "n2o") +
+#1 x (Total Energy of "oh") + 1 x (Total Energy of "n2") = -65.08
+sys1,sys2,sys3,sys4,stoich1,stoich2,stoich3,stoich4,ref
+h,n2o,oh,n2,-1,-1,1,1,-65.08
+h,ch3f,hf,ch3,-1,-1,1,1,-26.64
+h,f2,hf,f,-1,-1,1,1,-103.91
+ch3,clf,ch3f,cl,-1,-1,1,1,-52.74
+f-,ch3cl,cl-,ch3f,-1,-1,1,1,-32.65
+fch3clcomp1-,fch3clcomp2-,,,-1,1,,,-26.73
+oh-,ch3f,ch3oh,f-,-1,-1,1,1,-20.11
+hoch3fcomp2-,hoch3fcomp1-,,,-1,1,,,-36.24
+h,n2,hn2,,-1,-1,1,,3.97
+h,co,hco,,-1,-1,1,,-19.51
+h,c2h4,c2h5,,-1,-1,1,,-40.03
+ch3,c2h4,c3h7,,-1,-1,1,,-26.12
+hnc,hcn,,,-1,1,,,-15.05
+h,hcl,h2,cl,-1,-1,1,1,-3
+oh,h2,h2o,h,-1,-1,1,1,-16.1
+ch3,h2,ch4,h,-1,-1,1,1,-3.2
+oh,ch4,h2o,ch3,-1,-1,1,1,-12.9
+oh,nh3,h2o,nh2,-1,-1,1,1,-9.5
+hcl,ch3,cl,ch4,-1,-1,1,1,-6.2
+oh,c2h6,h2o,c2h5,-1,-1,1,1,-16.5
+f,h2,hf,h,-1,-1,1,1,-31.6
+o,ch4,oh,ch3,-1,-1,1,1,5.6
+h,ph3,h2,ph2,-1,-1,1,1,-20.1
+h,oh,h2,o,-1,-1,1,1,-2.4
+h,h2s,h2,hs,-1,-1,1,1,-13.8
+o,hcl,oh,cl,-1,-1,1,1,-0.6
+nh2,ch3,nh,ch4,-1,-1,1,1,-14.4
+nh2,c2h5,nh,c2h6,-1,-1,1,1,-10.8
+c2h6,nh2,c2h5,nh3,-1,-1,1,1,-7.0
+nh2,ch4,nh3,ch3,-1,-1,1,1,-3.3

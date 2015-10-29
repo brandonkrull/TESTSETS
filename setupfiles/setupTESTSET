@@ -78,97 +78,54 @@ echo "starting to work on $CNAME.$METHOD"
 cd $CNAME.$METHOD
 # get a list of the different structures and start the setup loop
 for j in `ls $structs/.` 
-  do
-  if [ ! -d "$j" ]; then
+    do
+        if [ ! -d "$j" ]; then
 #
 # create working directory without spin multiplicity and enter
-    echo " starting $j "
-    k=$(echo $j | sed 's/\..*/\ /')
-    mkdir $k
-    cd $k
-    touch $j
+            echo " starting $j "
+            k=$(echo $j | sed 's/\..*/\ /')
+            mkdir $k
+            cd $k
+            touch $j
 # bring setup coordinates over from structures directory
-    cp $structs/$j coord
+            cp $structs/$j coord
 # check if this system has peculiar features and run 
 #  the appropriate setup
-    if grep -q + <<<$j; then #if cation
-      if [[ -f $topd/setupfiles/setup.$METHOD.cat ]] ; then
-         if grep -q "\." <<<$j; then #if Sz > 0
-             if grep -q doub <<< $j; then
-                 u=1
-             elif grep -q trip <<< $j; then
-                 u=2
-             elif grep -q quart <<< $j; then
-                 u=3
-             fi
+            if [[ -f $topd/setupfiles/setup.$METHOD ]] ; then
+                if grep -q "+" <<<$j; then 
+                    charge=+1
+                elif grep -q "-" <<<$j; then
+                    charge=-1
+                else
+                    charge=0
+                fi
 
-             sed "/\+1/a \nn\nn\nu $u\n\*\n" $topd/setupfiles/setup.$METHOD.cat > tmp
-             bash tmp $k $CNAME $OUTFILE
-#             rm tmp
-         else
-             $topd/setupfiles/setup.$METHOD.cat $k $CNAME $OUTFILE
-         fi
-      else
-         echo "################################################################"
-         echo "     No setup file available for cations    "
-         echo "     exiting setup, be sure to reset by deleting bad directories"
-         echo "################################################################"
-         exit
-      fi
-    elif grep -q - <<<$j; then
-      if [[ -f $topd/setupfiles/setup.$METHOD.an ]] ; then
-         if grep -q "\." <<<$j; then # Sz > 0
-             if grep -q doub <<< $j; then
-                 u=1
-             elif grep -q trip <<< $j; then
-                 u=2
-             elif grep -q quart <<< $j; then
-                 u=3
-             fi
+                if grep -q "\." <<< $j; then
+                    if grep -q doub <<< $j; then
+                        u=1
+                    elif grep -q trip <<< $j; then
+                        u=2
+                    elif grep -q quart <<< $j; then
+                        u=3
+                    fi
+                    sed "/eht/a y\n$charge\nn\nn\nu $u\n\*\n" $topd/setupfiles/setup.$METHOD > tmp
+                else
+                    sed "/eht/a y\n$charge\n" $topd/setupfiles/setup.$METHOD > tmp
+                fi
 
-             sed "/\-1/a \nn\nn\nu $u\n\*\n" $topd/setupfiles/setup.$METHOD.an > tmp
-             bash tmp $k $CNAME $OUTFILE
-#             rm tmp
-         else
-             $topd/setupfiles/setup.$METHOD.an $k $CNAME $OUTFILE
-         fi
-      else
-         echo "################################################################"
-         echo "     No setup file available for anions    "
-         echo "     exiting setup, be sure to reset by deleting bad directories"
-         echo "################################################################"
-         exit
-      fi
-    else # neutral system, 
-      if [[ -f $topd/setupfiles/setup.$METHOD ]] ; then
-          if grep -q "\." <<<$j; then # Sz > 0
-              if grep -q doub <<< $j; then
-                  u=1
-              elif grep -q trip <<< $j; then
-                  u=2
-              elif grep -q quart <<< $j; then
-                  u=3
-              fi
+                bash tmp $k $CNAME $OUTFILE
+                rm tmp*
+           else
+                echo "################################################################"
+                echo "     No setup file available for $METHOD    "
+                echo "     exiting setup, be sure to reset by deleting bad directories"
+                echo "################################################################"
+                exit
+           fi
+       fi
+       cd ..
+    done
 
-              sed "/eht/a \n\nn\nn\nu $u\n\*\n" $topd/setupfiles/setup.$METHOD > tmp
-              bash tmp $k $CNAME $OUTFILE
-#              rm tmp
-          else
-              $topd/setupfiles/setup.$METHOD.an $k $CNAME $OUTFILE
-          fi
-      else
-         echo "################################################################"
-         echo "     No setup file available for $METHOD    "
-         echo "     exiting setup, be sure to reset by deleting bad directories"
-         echo "################################################################"
-         exit
-      fi
-    fi
-# return to the basis set directory and move on to the next system
-    echo " end of $j "
-    cd ..
-  fi
-  done
 cd ..
 # return to the original top directory containing TESTSET
 cd ..
